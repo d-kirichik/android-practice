@@ -49,3 +49,6 @@ public class MainActivity extends Activity implements SensorEventListener {
         coordTextView.setText(yaw_angle + "\n" + pitch_angle + "\n" + roll_angle + "\n" + cos);
     }
 }
+
+//httpOK
+//1) Сервер 2) Post-method
