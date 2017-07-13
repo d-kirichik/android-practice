@@ -1,5 +1,8 @@
 package com.example.seven_teen.getsensordata;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.widget.TextView;
 
@@ -18,14 +21,26 @@ import static com.example.seven_teen.getsensordata.MainActivity.JSON;
  * Created by seven-teen on 13.07.17.
  */
 
-public class SendDataTask extends AsyncTask<JSONObject, Void, String> {
+class SendDataTask extends AsyncTask<JSONObject, Void, String> {
 
-    String url;
-    TextView coordTextView;
+    private String url;
+    private TextView coordTextView;
+    private Context context;
 
-    SendDataTask(String url, TextView coordTextView) {
+    SendDataTask(Context context, String url, TextView coordTextView) {
         this.url = url;
         this.coordTextView = coordTextView;
+        this.context = context;
+    }
+
+    @Override
+    protected void onPreExecute(){
+        ConnectivityManager connMgr = (ConnectivityManager)
+                context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        if(networkInfo == null || !networkInfo.isConnected()){
+            throw new RuntimeException("Internet connection is not established!");
+        }
     }
 
     @Override
@@ -39,7 +54,7 @@ public class SendDataTask extends AsyncTask<JSONObject, Void, String> {
                     .build();
             Response response = client.newCall(request).execute();
             return response.body().string();
-        } catch (IOException e) {
+        } catch (NullPointerException | IOException e) {
             e.printStackTrace();
             return Long.valueOf(System.currentTimeMillis()).toString();
         }

@@ -39,7 +39,6 @@ public class MainActivity extends Activity implements SensorEventListener {
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mOrientation = mSensorManager.getDefaultSensor(Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR);
         mAcceleration = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-
         timeStamp = System.currentTimeMillis();
     }
 
@@ -77,7 +76,12 @@ public class MainActivity extends Activity implements SensorEventListener {
         if (now - timeStamp > 3000) {
             timeStamp = now;
             JSONObject postReq = formJSON(SensorQueue);
-            new SendDataTask("http://10.0.2.2:8081/postData", coordTextView).execute(postReq);
+            try {
+                new SendDataTask(this, "http://10.0.2.2:8081/postData", coordTextView).execute(postReq);
+            }
+            catch(RuntimeException e){
+                e.printStackTrace();
+            }
             SensorQueue.clear();
         }
     }
