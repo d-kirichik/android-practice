@@ -2,6 +2,8 @@ package com.example.seven_teen.getsensordata;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -76,12 +78,15 @@ public class MainActivity extends Activity implements SensorEventListener {
         if (now - timeStamp > 3000) {
             timeStamp = now;
             JSONObject postReq = formJSON(SensorQueue);
-            try {
-                new SendDataTask(this, "http://10.0.2.2:8081/postData", coordTextView).execute(postReq);
-            }
-            catch(RuntimeException e){
-                e.printStackTrace();
-            }
+            Intent mServiceIntent = new Intent(this, SendDataIntent.class);
+            mServiceIntent.putExtra("data", postReq.toString());
+            mServiceIntent.putExtra("url", "http://10.0.2.2:8081/postData");
+            this.startService(mServiceIntent);
+            SendDataBroadcastReciever mReceiver = new SendDataBroadcastReciever(coordTextView);
+            IntentFilter intentFilter = new IntentFilter(
+                    SendDataIntent.ACTION_MYINTENTSERVICE);
+            intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
+            registerReceiver(mReceiver, intentFilter);
             SensorQueue.clear();
         }
     }
