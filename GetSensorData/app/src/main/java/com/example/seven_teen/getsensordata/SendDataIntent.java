@@ -1,7 +1,10 @@
 package com.example.seven_teen.getsensordata;
 
 import android.app.IntentService;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.annotation.Nullable;
 
 import java.io.IOException;
@@ -22,17 +25,23 @@ class SendDataIntent extends IntentService {
     public static final String ACTION_MYINTENTSERVICE = "SendDataIntentService.RESPONSE";
     public static final String EXTRA_KEY_OUT = "EXTRA_OUT";
 
-    public SendDataIntent(){
+    public SendDataIntent() {
         super("Send Data");
     }
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
+        ConnectivityManager connMgr = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        if (networkInfo == null || !networkInfo.isConnected()) {
+            System.out.println("Internet connection is not established!");
+            return;
+        }
         String dataString, url;
-        if(intent != null) {
+        if (intent != null) {
             dataString = intent.getStringExtra("data");
             url = intent.getStringExtra("url");
-        } else{
+        } else {
             System.out.println("Empty request");
             return;
         }
@@ -51,7 +60,7 @@ class SendDataIntent extends IntentService {
             sendBroadcast(responseIntent);
         } catch (NullPointerException | IOException e) {
             e.printStackTrace();
-            responseIntent.putExtra(EXTRA_KEY_OUT,  Long.valueOf(System.currentTimeMillis()).toString());
+            responseIntent.putExtra(EXTRA_KEY_OUT, Long.valueOf(System.currentTimeMillis()).toString());
         }
 
     }
